@@ -46,11 +46,12 @@ class ShouldBuildJob implements Serializable {
     // changeSets will always be empty during replay (https://issues.jenkins.io/browse/JENKINS-36453)
     boolean hasApiChange = false
     boolean hasWebsiteChange = false
-    boolean doChromatic = true
     int numIgnored = 0
+    StringBuilder commitBuilder = new StringBuilder()
     m_steps.echo "Reviewing ${m_steps.currentBuild.changeSets.size()} change set(s)"
     for (changeLogSet in m_steps.currentBuild.changeSets) {
       for (item in changeLogSet.getItems()) {
+        m_steps.echo "msg: ${item.msg}"
         m_commitMessages.add(item.msg)
         for (file in item.affectedFiles) {
           def path = file.path
@@ -75,16 +76,20 @@ class ShouldBuildJob implements Serializable {
     if (!hasApiChange && !hasWebsiteChange && numIgnored == 0) {
       // is replay?
       if (m_isReplay) {
-        m_steps.echo "IS REPLAY!  Forcing PGKB_DO_API and PGKB_DO_WEBSITE to true, PGKB_DO_CHROMATIC to false"
-        doChromatic = false
+        m_steps.echo "IS REPLAY!  Forcing PGKB_DO_API and PGKB_DO_WEBSITE to true, PGKB_DO_STORYBOOK to false"
+        hasApiChange = true
+        hasWebsiteChange = true
       } else {
         m_steps.echo "Nothing to do!  Found ${numIgnored} skippable files..."
       }
     }
     m_steps.env.PGKB_DO_API = hasApiChange
     m_steps.env.PGKB_DO_WEBSITE = hasWebsiteChange
-    m_steps.env.PGKB_DO_CHROMATIC = doChromatic
+    m_steps.env.PGKB_DO_STORYBOOK = hasWebsiteChange && !m_isReplay &&
+        (m_branch == "master" || m_branch == "development")
+    m_steps.env.PGKB_COMMITS = String.join("\n", m_commitMessages)
     m_steps.env.IS_REPLAY = m_isReplay
+    m_steps.echo "COMMITS:\n ${m_steps.env.PGKB_COMMITS}"
   }
 
 
