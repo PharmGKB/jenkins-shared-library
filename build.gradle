@@ -1,0 +1,65 @@
+plugins {
+  id 'groovy'
+  id 'java'
+  id 'com.mkobit.jenkins.pipelines.shared-library' version '0.10.1'
+}
+
+
+def getVersionName() {
+  def errOut = new ByteArrayOutputStream()
+  try {
+    def stdOut = new ByteArrayOutputStream()
+    exec {
+      commandLine 'git', 'describe', '--tags'
+      standardOutput = stdOut
+      errorOutput = errOut
+    }
+    // strip of leading "v"
+    return stdOut.toString().trim().substring(1)
+  } catch (ignore) {
+    logger.info('Error running git describe (' + errOut.toString().trim() + '), defaulting to 0.0.0')
+    return '0.0.0'
+  }
+}
+
+
+project.group = 'org.pharmgkb'
+project.version = getVersionName()
+
+ext {
+  baseName = 'jenkins-shared-library'
+  moduleName = 'org.pharmgkb.jenkins'
+  description = 'Jenkins shared library used by PharmGKB.'
+  url = 'https://github.com/PharmGKB/jenkins-shared-library'
+  scm = 'scm:git@github.com:PharmGKB/jenkins-shared-library.git'
+  orgName = 'PharmGKB'
+  orgUrl = 'https://www.pharmgkb.org'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation group: 'org.jenkins-ci.main', name: 'jenkins-core', version: '2.85'
+  implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-cps', version: '2.41', ext: 'jar'
+  implementation group: 'org.jenkins-ci.plugins.workflow', name: 'workflow-support', version: '2.16', ext: 'jar'
+  implementation group: 'org.jenkins-ci.plugins', name: 'script-security', version: '1.34', ext: 'jar'
+
+  implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '3.0.8'
+}
+
+sourceSets {
+  main {
+    groovy {
+      srcDirs = ['src', 'vars']
+    }
+  }
+  test {
+    groovy {
+      srcDirs = ['test']
+    }
+  }
+}
