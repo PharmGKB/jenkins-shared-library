@@ -51,8 +51,14 @@ class ShouldBuildJob implements Serializable {
     m_steps.echo "Reviewing ${m_steps.currentBuild.changeSets.size()} change set(s)"
     for (changeLogSet in m_steps.currentBuild.changeSets) {
       for (item in changeLogSet.getItems()) {
-        m_steps.echo "msg: ${item.msg}"
-        m_commitMessages.add(item.msg)
+        String msg = item.msg
+        if (msg != null) {
+          msg = msg.trim()
+          if (msg.length() > 0) {
+            m_steps.echo "msg: ${msg}"
+            m_commitMessages.add(msg)
+          }
+        }
         for (file in item.affectedFiles) {
           def path = file.path
           m_steps.echo "file: ${path}"
