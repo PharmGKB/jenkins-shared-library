@@ -108,7 +108,7 @@ class ShouldBuildJob implements Serializable {
 
 
   boolean becauseDependabot() {
-    if (m_jobName.startsWith("dependabot")) {
+    if (m_branch.startsWith("dependabot")) {
       return abort("Ignore dependabot branches")
     }
     return true
@@ -116,7 +116,7 @@ class ShouldBuildJob implements Serializable {
 
 
   boolean becausePullRequest() {
-    if (m_jobName.matches("PR-\\d+/\\d+")) {
+    if (m_branch.matches("PR-\\d+")) {
       return abort("Ignore pull requests")
     }
     return true
@@ -126,7 +126,7 @@ class ShouldBuildJob implements Serializable {
   /**
    * Checks if all commits have {@code [skip ci]} in its message.
    * <p>
-   * This will always return true duringa replay (https://issues.jenkins.io/browse/JENKINS-36453).
+   * This will always return true during a replay (https://issues.jenkins.io/browse/JENKINS-36453).
    */
   boolean becauseSkipCi() {
     m_steps.echo "Checking for [skip ci]..."
