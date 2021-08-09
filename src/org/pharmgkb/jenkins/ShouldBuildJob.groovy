@@ -91,8 +91,7 @@ class ShouldBuildJob implements Serializable {
     }
     m_steps.env.PGKB_DO_API = hasApiChange
     m_steps.env.PGKB_DO_WEBSITE = hasWebsiteChange
-    m_steps.env.PGKB_DO_STORYBOOK = hasWebsiteChange && !m_isReplay &&
-        (m_branch == "master" || m_branch == "development")
+    m_steps.env.PGKB_DO_STORYBOOK = hasWebsiteChange && !m_isReplay && m_branch == "development"
     m_steps.env.PGKB_COMMITS = String.join("\n", m_commitMessages)
     m_steps.env.IS_REPLAY = m_isReplay
     m_steps.echo "COMMITS:\n ${m_steps.env.PGKB_COMMITS}"
